@@ -1,65 +1,61 @@
 <?php
 session_start();
-require 'db.php'; 
+require 'db.php';
 
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php");
-    exit;
-}
+// laden & sortieren
+$stmt = $pdo->query("SELECT * FROM products ORDER BY (upvotes - downvotes) DESC");
+$products = $stmt->fetchAll();
 
-$error = $success = ""; 
-
+// Voting logik
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $title = $_POST["title"];
-    $image = $_FILES["image"];
+    $id = $_POST["id"];
+    $vote = $_POST["vote"];
 
-    if ($image["error"] === 0) {
-        $target_dir = "uploads/"; 
-        $file_name = basename($image["name"]);
-        $target_file = $target_dir . $file_name;
-
-        if (move_uploaded_file($image["tmp_name"], $target_file)) {
-            $stmt = $pdo->prepare("INSERT INTO products (title, image_filename) VALUES (?, ?)");
-            $stmt->execute([$title, $file_name]);
-            $success = "Produkt erfolgreich hinzugefügt!";
-        } else {
-            $error = "Fehler beim Hochladen des Bildes!";
-        }
-    } else {
-        $error = "Kein gültiges Bild ausgewählt!";
+    if ($vote === "up") {
+        $pdo->query("UPDATE products SET upvotes = upvotes + 1 WHERE id = $id");
+    } elseif ($vote === "down") {
+        $pdo->query("UPDATE products SET downvotes = downvotes + 1 WHERE id = $id");
     }
+    header("Location: index.php");
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produkt hinzufügen</title>
+    <title>Voting App</title>
     <link rel="stylesheet" href="/css/pico.classless.min.css">
 </head>
 <body>
-    <main class="container">
-        <h1>Produkt hinzufügen</h1>
 
-        <?php if ($success): ?>
-            <p style="color: green;"><?php echo $success; ?></p>
-        <?php elseif ($error): ?>
-            <p style="color: red;"><?php echo $error; ?></p>
+
+    <main class="container">
+        <h1>Voting App</h1>
+        <h3>To vote please log in</h3>
+        <h3>To upload please log in as Admin</h3>
+        <a href="login.php" role="button">Login</a>
+        <a href="logout.php" role="button">Logout</a>
+        
+        <?php if (isset($_SESSION["admin"])): ?>
+            <a href="admin.php" role="button">Admin-Bereich</a>
+            <a href="logout.php" role="button">Logout</a>
         <?php endif; ?>
 
-        <form method="POST" enctype="multipart/form-data">
-            <label for="title">Produktname:</label>
-            <input type="text" id="title" name="title" required>
-
-            <label for="image">Produktbild:</label>
-            <input type="file" id="image" name="image" accept="image/*" required>
-
-            <button type="submit">Produkt hinzufügen</button>
-        </form>
-
-        <p><a href="index.php">Zurück zur Produktliste</a></p>
+        <section>
+            <?php foreach ($products as $product): ?>
+                <article>
+                    <h2><?php echo htmlspecialchars($product['title']); ?></h2>
+                    <img src="uploads/<?php echo htmlspecialchars($product['image_filename']); ?>" alt="Bild" style="width: 30%; height: auto;">
+                    <p>Upvotes: <?php echo $product['upvotes']; ?> | Downvotes: <?php echo $product['downvotes']; ?></p>
+                    <form method="POST">
+                        <input type="hidden" name="id" value="<?php echo $product['id']; ?>">
+                        <button type="submit" name="vote" value="up">👍 Upvote</button>
+                        <button type="submit" name="vote" value="down">👎 Downvote</button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        </section>
     </main>
 </body>
 </html>

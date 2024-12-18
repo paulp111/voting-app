@@ -1,34 +1,44 @@
 <?php
 session_start();
-require 'db.php';
-
-if (!isset($_SESSION["user"])) {
+if (!isset($_SESSION["admin"])) {
     header("Location: login.php");
     exit;
 }
+require 'db.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// add things for vote 
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
     $title = $_POST["title"];
     $image = $_FILES["image"];
 
-    $filename = basename($image["name"]);
-    move_uploaded_file($image["tmp_name"], "uploads/" . $filename);
+    if ($image["error"] === 0) {
+        $target_dir = "uploads/";
+        $file_name = basename($image["name"]);
+        move_uploaded_file($image["tmp_name"], $target_dir . $file_name);
 
-    $stmt = $pdo->prepare("INSERT INTO products (title, image_filename) VALUES (?, ?)");
-    $stmt->execute([$title, $filename]);
-
-    header("Location: admin.php");
-    exit;
+        $stmt = $pdo->prepare("INSERT INTO products (title, image_filename) VALUES (?, ?)");
+        $stmt->execute([$title, $file_name]);
+    }
 }
 ?>
 
-<main class="container">
-    <h1>Produkt hinzufügen</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <label for="title">Titel</label>
-        <input type="text" id="title" name="title" required>
-        <label for="image">Bild</label>
-        <input type="file" id="image" name="image" required>
-        <button type="submit">Hinzufügen</button>
-    </form>
-</main>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Admin Bereich</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css">
+</head>
+<body>
+    <main class="container">
+        <h2>Admin-Bereich</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Titel</label>
+            <input type="text" name="title" required>
+            <label>Bild</label>
+            <input type="file" name="image" required>
+            <button type="submit">Post hinzufügen</button>
+        </form>
+        <a href="logout.php" role="button">Logout</a>
+    </main>
+</body>
+</html>

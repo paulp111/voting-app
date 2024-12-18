@@ -14,3 +14,5 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
+
+ALTER TABLE products ADD COLUMN voting_score INT DEFAULT 0;
