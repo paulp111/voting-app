@@ -15,4 +15,4 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL
 );
 
-ALTER TABLE products ADD COLUMN voting_score INT DEFAULT 0;
+/* ALTER TABLE products ADD COLUMN voting_score INT DEFAULT 0; */
