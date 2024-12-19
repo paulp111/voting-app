@@ -6,7 +6,6 @@ if (!isset($_SESSION["admin"])) {
 }
 require 'db.php';
 
-// add things for vote 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
     $title = $_POST["title"];
     $image = $_FILES["image"];
@@ -24,10 +23,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
 
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <title>Admin Bereich</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css">
+    <link rel="stylesheet" href="/css/pico.classless.min.css">
 </head>
+
 <body>
     <main class="container">
         <h2>Admin-Bereich</h2>
@@ -36,9 +37,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
             <input type="text" name="title" required>
             <label>Bild</label>
             <input type="file" name="image" required>
-            <button type="submit">Post hinzufügen</button>
+            <button type="submit">Produkt hinzufügen</button>
         </form>
+        <a href="index.php" role="button">Zurück zur Startseite</a>
         <a href="logout.php" role="button">Logout</a>
     </main>
 </body>
+
 </html>

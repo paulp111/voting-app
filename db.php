@@ -10,4 +10,3 @@ try {
 } catch (PDOException $e) {
     die("Datenbankverbindung fehlgeschlagen: " . $e->getMessage());
 }
-?>
